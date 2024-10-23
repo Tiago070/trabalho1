@@ -22,7 +22,7 @@ int main() {
     char opc;
 
     do {
-        cout << "Sistema de Biblioteca" << endl;
+        cout << "---------SISTEMA DE GERENCIAMENTO DE BIBLIOTECA--------" << endl;
         cout << "1 - Cadastro" << endl;
         cout << "2 - Alteração" << endl;
         cout << "3 - Exclusão" << endl;
@@ -42,8 +42,11 @@ int main() {
             cout << "CADASTRO DE LIVROS" << endl << endl;
             cout << "Deseja cadastrar um livro? [S/N]: ";
             cin >> opc;
+
             while (opc == 'S'){
+
                 dadosLivros = fopen("dadosLivros.dat", "ab+");
+
                 if (dadosLivros == NULL){
                     cout << "Erro ao abrir o arquivo" << endl;
                     cin.ignore();
@@ -75,22 +78,74 @@ int main() {
             }
             break;
         case 2:
+            cout << "ALTERAÇÃO DE LIVRO" << endl;
+            cout << "Deseja alterar um livro? [S/N]: " << endl;
+            cin >> opc;
+            cout << "Informe o código do livro: " << endl;
+            cin >> codLivro;
+
+            dadosLivros = fopen("dadosLivros.dat", "ab+");
+            fread(&livro, sizeof(struct livros), 1, dadosLivros);
+
+            while (!feof(dadosLivros) && opc == 'S'){
+                if (codLivro == livro.codigo){
+                    if (dadosLivros == NULL){
+                        cout << "Erro ao abrir o arquivo" << endl;
+                        cin.ignore();
+                        cin.get();
+                    } else{
+                        cout << "Informe os novos dados do livro: " << endl;
+                        cout << "Código: ";
+                        cin >> livro.codigo;
+                        cout << "Área de conhecimento [E - Exatas, H - Humanas, B - Biológicas]: ";
+                        cin >> livro.area;
+                        cout << "Título: ";
+                        cin.get(livro.titulo, 149);
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        cout << "Autor(es): ";
+                        cin.get(livro.autor, 254);
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        cout << "Editora: ";
+                        cin.get(livro.editora, 49);
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                        cout << "Número de páginas: ";
+                        cin >> livro.paginas;
+                        livro.status = 'S';
+                        fwrite(&livro, sizeof(struct livros), 1, dadosLivros);
+                        fclose(dadosLivros);
+                    } 
+                }
+                cout << "Deseja alterar outro livro? [S/N]: ";
+                cin >> opc;
+            }
             break;
         case 3:
+            cout << "EXCLUSÃO DE LIVRO" << endl;
+            cout << "Em contrução..." << endl;
+
             break;
         case 4:
-            cout << "Emprestar Livro" << endl;
+            cout << "EMPRÉSTIMO DE LIVRO" << endl;
             cout << "Informe o código do livro: ";
             cin >> codLivro;
-            for (i=0; i<3; i++){
+
+            dadosLivros = fopen("dadosLivros.dat", "ab+");
+
+            if (dadosLivros == NULL){
+                cout << "Erro ao abrir o arquivo" << endl;
+                cin.ignore();
+                cin.get();
+            } else{
                 if (codLivro == livro.codigo){
                     cout << "Informe a data do empréstimo: ";
-                    cin.get();
-                    getline(cin, livro.emp.dataEmprestimo);
+                    cin.get(livro.emp.dataEmprestimo, 9);
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     cout << "Informe a data de devolução: ";
-                    getline(cin, livro.emp.dataDevolucao);
+                    cin.get(livro.emp.dataDevolucao, 9);
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     cout << "Informe o nome do usuário: ";
-                    getline(cin, livro.emp.usuario);
+                    cin.get(livro.emp.usuario, 149);
+                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     cout << "Livro emprestado com sucesso!" << endl;
                 }
             }

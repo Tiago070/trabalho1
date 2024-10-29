@@ -1,25 +1,26 @@
 #include <iostream>
 #include <cstdio>
 #include <limits>
+#include <cstring>
 
 using namespace std;
 
+FILE *arquivo, *auxiliar;
+
+struct emprestimos{
+    char dataEmprestimo[10], dataDevolucao[10], usuario[150];
+};
+
+struct livros{
+    int codigo, paginas;
+    char titulo[150], autor[255], editora[50], area[30];
+    struct emprestimos emp;
+} livro;
+
+int opcaoMenu, codLivro, posicao;
+char opc;
+
 int main() {
-    FILE *arquivo, *auxiliar;
-
-    struct emprestimos{
-        char dataEmprestimo[10], dataDevolucao[10], usuario[150];
-    };
-    
-    struct livros{
-        int codigo, paginas;
-        char titulo[150], autor[255], editora[50], area[30];
-        struct emprestimos emp;
-    } livro;
-
-    int opcaoMenu, codLivro, posicao;
-    char opc;
-
     do {
         cout << "|||||||||||SISTEMA DE GERENCIAMENTO DE BIBLIOTECA|||||||||||||" << endl;
         cout << "1 - Cadastro" << endl;
@@ -187,44 +188,93 @@ int main() {
             }
             break;
         case 5:
-            cout << "Devolver Livro" << endl;
-            cout << "Informe o código do livro: ";
-            cin >> codLivro;
-            for (i=0; i<3; i++){
-                if (codLivro == livro.codigo){
-                    livro.emp.dataEmprestimo = "";
-                    livro.emp.dataDevolucao = "";
-                    livro.emp.usuario = "";
-                    cout << "Livro devolvido com sucesso!" << endl;
+            arquivo = fopen("dados.dat", "rb+");
+            if (arquivo != NULL){
+                cout << "DEVOLUÇÃO DE LIVRO" << endl;
+                cout << "Informe o código do livro: ";
+                cin >> codLivro;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    
+                posicao = -1;
+                while(!feof(arquivo)){
+                    fread(&livro, sizeof(struct livros), 1, arquivo);
+                    posicao++;
+                    if (codLivro == livro.codigo){
+                        fseek(arquivo, sizeof(struct livros) * posicao, SEEK_SET);
+                        strcpy(livro.emp.dataEmprestimo, "");
+                        strcpy(livro.emp.dataDevolucao, "");
+                        strcpy(livro.emp.usuario, "");
+                        fwrite(&livro, sizeof(struct livros), 1, arquivo);
+                        break;
+                    }
                 }
+                fclose(arquivo);
+
+            } else {
+                cout << "Erro ao abrir o banco de dados!";
+                cin.ignore();
+                cin.get();
             }
             break;
         case 6:
-            cout << "Consultar livro" << endl;
-            cout << "Informe o código do livro: ";
-            cin >> codLivro;
-            for (i=0; i<3; i++){
-                if (codLivro == livro.codigo){
-                    cout << "Código: " << livro.codigo << endl;
-                    cout << "Área de conhecimento: " << livro.area << endl;
-                    cout << "Título: " << livro.titulo << endl;
-                    cout << "Autor(es): " << livro.autor << endl;
-                    cout << "Editora: " << livro.editora << endl;
-                    cout << "Número de páginas: " << livro.paginas << endl;
-                    if (livro.emp.dataEmprestimo != ""){
-                        cout << "Data do empréstimo: " << livro.emp.dataEmprestimo << endl;
-                        cout << "Data de devolução: " << livro.emp.dataDevolucao << endl;
-                        cout << "Usuário: " << livro.emp.usuario << endl;
+            arquivo = fopen("dados.dat", "rb");
+            if (arquivo != NULL){
+                cout << "CONSULTAR LIVRO" << endl;
+                cout << "Informe o código do livro: ";
+                cin >> codLivro;
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                while(!feof(arquivo)){
+                    fread(&livro, sizeof(struct livros), 1, arquivo);
+                    if (codLivro == livro.codigo){
+                        cout << "Código: " << livro.codigo << endl;
+                        cout << "Área de conhecimento: " << livro.area << endl;
+                        cout << "Título: " << livro.titulo << endl;
+                        cout << "Autor(es): " << livro.autor << endl;
+                        cout << "Editora: " << livro.editora << endl;
+                        cout << "Número de páginas: " << livro.paginas << endl;
+                        cin.get();
+                        break;
                     }
-                    cin.ignore();
-                    cin.get();
                 }
+                fclose(arquivo);
+            } else {
+                cout << "Erro ao abrir o banco de dados!";
+                cin.ignore();
+                cin.get();
             }
             break;
         case 7:
-            cout << "Livros disponíveis" << endl;
-            for (i=0; i<3; i++){
-                if (livro.emp.dataEmprestimo == ""){
+            arquivo = fopen("dados.dat", "rb");
+            if (arquivo != NULL){
+                cout << "LIVROS DISPONÍVEIS" << endl;
+                while(!feof(arquivo)){
+                    if (strcmp(livro.emp.dataEmprestimo, "") == 0){
+                        cout << "Código: " << livro.codigo << endl;
+                        cout << "Área de conhecimento: " << livro.area << endl;
+                        cout << "Título: " << livro.titulo << endl;
+                        cout << "Autor(es): " << livro.autor << endl;
+                        cout << "Editora: " << livro.editora << endl;
+                        cout << "Número de páginas: " << livro.paginas << endl;
+                        cout << endl;
+                    }
+                    fread(&livro, sizeof(struct livros), 1, arquivo);
+                }
+                fclose(arquivo);
+                cin.ignore();
+                cin.get();
+            } else {
+                cout << "Erro ao abrir o banco de dados!";
+                cin.ignore();
+                cin.get();
+            }
+            break;
+        case 8:
+            arquivo = fopen("dados.dat", "rb");
+            if (arquivo != NULL){
+                fread(&livro, sizeof(struct livros), 1, arquivo);
+                while(!feof(arquivo)){
+                    cout << "LISTAGEM GERAL DE LIVROS" << endl;
                     cout << "Código: " << livro.codigo << endl;
                     cout << "Área de conhecimento: " << livro.area << endl;
                     cout << "Título: " << livro.titulo << endl;
@@ -232,29 +282,22 @@ int main() {
                     cout << "Editora: " << livro.editora << endl;
                     cout << "Número de páginas: " << livro.paginas << endl;
                     cout << endl;
+                    fread(&livro, sizeof(struct livros), 1, arquivo);
                 }
+            fclose(arquivo);
+                cin.ignore();
+                cin.get();
+            } else {
+                cout << "Erro ao abrir o banco de dados!";
+                cin.ignore();
+                cin.get();
             }
-            cin.ignore();
-            cin.get();
             break;
-        case 8:
-            cout << "Listagem geral de livros" << endl;
-            dadosLivros = fopen("dadosLivros.dat", "rb");
-            fread(&livro, sizeof(struct livros), 1, dadosLivros);
-            while (!feof(dadosLivros)){
-                cout << "Código: " << livro.codigo << endl;
-                cout << "Área de conhecimento: " << livro.area << endl;
-                cout << "Título: " << livro.titulo << endl;
-                cout << "Autor(es): " << livro.autor << endl;
-                cout << "Editora: " << livro.editora << endl;
-                cout << "Número de páginas: " << livro.paginas << endl;
-                cout << "Status: " << livro.status << endl;
-                cout << endl;
-                fread(&livro, sizeof(struct livros), 1, dadosLivros);
-            }
-            fclose(dadosLivros);
-            cin.ignore();
-            cin.get();
+        case 9: 
+            cout << "Saindo do sistema..." << endl;
+            break;
+        default:
+            cout << "Opção inválida!" << endl;
             break;
         }
         system("cls");

@@ -15,7 +15,7 @@ struct livros {
     struct emprestimos emp;
 };
 
-int opc_princ, cod, pos;
+int opcMenu, codLivro, posicao;
 char opc;
 
 FILE *arquivo, *arquivoAux;
@@ -35,9 +35,9 @@ int main(){
         cout << "8 - Listagem geral de livros" << endl;
         cout << "9 - Sair" << endl << endl;
         cout << "Digite a opção desejada: ";
-        cin >> opc_princ;
+        cin >> opcMenu;
 
-        switch (opc_princ){
+        switch (opcMenu){
             case 1:
                 cout << "Deseja cadastrar um livro (S ou N)?";
                 cin >> opc;
@@ -84,14 +84,14 @@ int main(){
                 if (arquivo != NULL){
 
                     cout << "Digite o código do livro que deseja alterar: ";
-                    cin >> cod;
+                    cin >> codLivro;
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     
-                    pos = -1;
+                    posicao = -1;
                     while(!feof(arquivo)){
                         fread(&livro, sizeof(struct livros), 1, arquivo);
-                        pos++;
-                        if (cod == livro.codigo){
+                        posicao++;
+                        if (codLivro == livro.codigo){
                             cout << "Área: ";
                             cin.get(livro.area, 30);
                             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -107,7 +107,7 @@ int main(){
                             cout << "Nº páginas: ";
                             cin >> livro.paginas;
 
-                            fseek(arquivo, sizeof(struct livros) * pos, SEEK_SET);
+                            fseek(arquivo, sizeof(struct livros) * posicao, SEEK_SET);
                             if (fwrite(&livro, sizeof(struct livros), 1, arquivo) == 1){
                                 cout << "Livro alterado com sucesso!";
                             } else {
@@ -128,13 +128,13 @@ int main(){
                 break;
             case 3:
                 cout << "Digite o código do livro que deseja excluir: ";
-                cin >> cod;
+                cin >> codLivro;
                 arquivo = fopen("dados.dat", "rb");
                 arquivoAux = fopen("dados.aux", "wb");
 
                 fread(&livro, sizeof(struct livros), 1, arquivo);
                 while(!feof(arquivo)){
-                    if (cod != livro.codigo){
+                    if (codLivro != livro.codigo){
                         fwrite(&livro, sizeof(struct livros), 1, arquivoAux);
                     }
                     fread(&livro, sizeof(struct livros), 1, arquivo);
@@ -149,15 +149,15 @@ int main(){
                 arquivo = fopen("dados.dat", "rb+");
                 if (arquivo != NULL){
                     cout << "Digite o código do livro que deseja emprestar: ";
-                    cin >> cod;
+                    cin >> codLivro;
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     
-                    pos = -1;
+                    posicao = -1;
                     while(!feof(arquivo)){
                         fread(&livro, sizeof(struct livros), 1, arquivo);
-                        pos++;
-                        if (cod == livro.codigo){
-                            fseek(arquivo, sizeof(struct livros) * pos, SEEK_SET);
+                        posicao++;
+                        if (codLivro == livro.codigo){
+                            fseek(arquivo, sizeof(struct livros) * posicao, SEEK_SET);
                             cout << "Data de empréstimo: ";
                             cin.get(livro.emp.dt_emp, 10);
                             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -183,15 +183,15 @@ int main(){
                 arquivo = fopen("dados.dat", "rb+");
                 if (arquivo != NULL){
                     cout << "Digite o código do livro que deseja devolver: ";
-                    cin >> cod;
+                    cin >> codLivro;
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     
-                    pos = -1;
+                    posicao = -1;
                     while(!feof(arquivo)){
                         fread(&livro, sizeof(struct livros), 1, arquivo);
-                        pos++;
-                        if (cod == livro.codigo){
-                            fseek(arquivo, sizeof(struct livros) * pos, SEEK_SET);
+                        posicao++;
+                        if (codLivro == livro.codigo){
+                            fseek(arquivo, sizeof(struct livros) * posicao, SEEK_SET);
                             strcpy(livro.emp.dt_emp, "");
                             strcpy(livro.emp.dt_dev, "");
                             strcpy(livro.emp.usuario, "");
@@ -211,12 +211,12 @@ int main(){
                 arquivo = fopen("dados.dat", "rb");
                 if (arquivo != NULL){
                     cout << "Digite o código do livro que deseja pesquisar: ";
-                    cin >> cod;
+                    cin >> codLivro;
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
                     
                     while(!feof(arquivo)){
                         fread(&livro, sizeof(struct livros), 1, arquivo);
-                        if (cod == livro.codigo){
+                        if (codLivro == livro.codigo){
                             cout << "Código: " << livro.codigo << endl;
                             cout << "Área: " << livro.area << endl;
                             cout << "Título: " << livro.titulo << endl;
@@ -291,6 +291,6 @@ int main(){
                 break;
         }
         cout << "\e[2J" << "\e[0;0H";
-    } while (opc_princ != 9);
+    } while (opcMenu != 9);
 
 }
